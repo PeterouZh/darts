@@ -8,4 +8,6 @@ cnn_imagenet_pretrained:
   model_path: ~/.keras/darts/imagenet_model.pt
   auxiliary: true
 
-
+cnn_cifar10_train_search:
+  data: ~/.keras/cifar10
+  unrolled: true

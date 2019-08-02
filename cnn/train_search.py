@@ -43,21 +43,22 @@ parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='lear
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
 args = parser.parse_args()
 
-args.save = 'search-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
-utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
+# args.save = 'search-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
+# utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
 log_format = '%(asctime)s %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
     format=log_format, datefmt='%m/%d %I:%M:%S %p')
-fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
-fh.setFormatter(logging.Formatter(log_format))
-logging.getLogger().addHandler(fh)
+# fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
+# fh.setFormatter(logging.Formatter(log_format))
+# logging.getLogger().addHandler(fh)
 
 
 CIFAR_CLASSES = 10
 
 
-def main():
+def main(args, myargs):
+  logging = myargs.logger
   if not torch.cuda.is_available():
     logging.info('no gpu device available')
     sys.exit(1)
@@ -160,7 +161,7 @@ def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr):
     top5.update(prec5.data[0], n)
 
     if step % args.report_freq == 0:
-      logging.info('train %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
+      print('train %03d %e %f %f'%(step, objs.avg, top1.avg, top5.avg))
 
   return top1.avg, objs.avg
 
@@ -188,6 +189,22 @@ def infer(valid_queue, model, criterion):
       logging.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
 
   return top1.avg, objs.avg
+
+
+def run(args1, myargs):
+  config = getattr(myargs.config, args1.command)
+  myargs.config = config
+  for k, v in config.items():
+    setattr(args, k, v)
+
+  for k, v in vars(args1).items():
+    assert not hasattr(args, k)
+    setattr(args, k, v)
+
+  args.data = os.path.expanduser(args.data)
+  args.save = args.outdir
+  utils.create_exp_dir(args.save, scripts_to_save=glob.glob('../cnn/*.py'))
+  main(args, myargs)
 
 
 if __name__ == '__main__':
