@@ -39,7 +39,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 CIFAR_CLASSES = 10
 
 
-def main():
+def main(args, myargs):
+  logging = myargs.logger
   if not torch.cuda.is_available():
     logging.info('no gpu device available')
     sys.exit(1)
@@ -72,6 +73,7 @@ def main():
   model.drop_path_prob = args.drop_path_prob
   test_acc, test_obj = infer(test_queue, model, criterion)
   logging.info('test_acc %f', test_acc)
+  print('test_err: %f'%(100 - test_acc))
 
 
 def infer(test_queue, model, criterion):
@@ -94,9 +96,20 @@ def infer(test_queue, model, criterion):
     top5.update(prec5.data[0], n)
 
     if step % args.report_freq == 0:
-      logging.info('test %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
+      print('test %03d %e %f %f'%(step, objs.avg, top1.avg, top5.avg))
 
   return top1.avg, objs.avg
+
+
+def run(args1, myargs):
+  config = getattr(myargs.config, args1.command)
+  myargs.config = config
+  for k, v in config.items():
+    setattr(args, k, v)
+  args2 = argparse.Namespace(**vars(args), **vars(args1))
+  args2.model_path = os.path.expanduser(args2.model_path)
+  args2.data = os.path.expanduser(args2.data)
+  main(args2, myargs)
 
 
 if __name__ == '__main__':

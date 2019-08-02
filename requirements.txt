@@ -1,0 +1,7 @@
+torch==0.3.1
+torchvision==0.2.0
+easydict
+pyyaml
+tensorboardX==1.7
+tensorflow==1.13.1
+tqdm

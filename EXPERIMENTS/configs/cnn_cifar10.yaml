@@ -1,0 +1,11 @@
+cnn_cifar10_pretrained:
+  data: ~/.keras/cifar10
+  auxiliary: true
+  model_path: ~/.keras/darts/cifar10_model.pt
+
+cnn_imagenet_pretrained:
+  data: '~/.keras/ILSVRC/Data/CLS-LOC'
+  model_path: ~/.keras/darts/imagenet_model.pt
+  auxiliary: true
+
+

@@ -39,7 +39,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 CLASSES = 1000
 
 
-def main():
+def main(args, myargs):
+  logging = myargs.logger
   if not torch.cuda.is_available():
     logging.info('no gpu device available')
     sys.exit(1)
@@ -80,7 +81,9 @@ def main():
   model.drop_path_prob = args.drop_path_prob
   valid_acc_top1, valid_acc_top5, valid_obj = infer(valid_queue, model, criterion)
   logging.info('valid_acc_top1 %f', valid_acc_top1)
+  print('val err top1: %f'%(100 - valid_acc_top1))
   logging.info('valid_acc_top5 %f', valid_acc_top5)
+  print('val err top5: %f' % (100 - valid_acc_top5))
 
 
 def infer(valid_queue, model, criterion):
@@ -103,9 +106,20 @@ def infer(valid_queue, model, criterion):
     top5.update(prec5.data[0], n)
 
     if step % args.report_freq == 0:
-      logging.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
+      print('valid %03d %e %f %f'%(step, objs.avg, top1.avg, top5.avg))
 
   return top1.avg, top5.avg, objs.avg
+
+
+def run(args1, myargs):
+  config = getattr(myargs.config, args1.command)
+  myargs.config = config
+  for k, v in config.items():
+    setattr(args, k, v)
+  args2 = argparse.Namespace(**vars(args), **vars(args1))
+  args2.model_path = os.path.expanduser(args2.model_path)
+  args2.data = os.path.expanduser(args2.data)
+  main(args2, myargs)
 
 
 if __name__ == '__main__':
