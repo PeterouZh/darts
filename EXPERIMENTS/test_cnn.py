@@ -121,9 +121,9 @@ class TestingTrainSearch(unittest.TestCase):
     :return:
     """
     if 'CUDA_VISIBLE_DEVICES' not in os.environ:
-      os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3,4,5'
+      os.environ['CUDA_VISIBLE_DEVICES'] = '5'
     if 'PORT' not in os.environ:
-      os.environ['PORT'] = '6006'
+      os.environ['PORT'] = '6011'
     if 'TIME_STR' not in os.environ:
       os.environ['TIME_STR'] = '0'
 

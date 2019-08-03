@@ -106,10 +106,14 @@ def run(args1, myargs):
   myargs.config = config
   for k, v in config.items():
     setattr(args, k, v)
-  args2 = argparse.Namespace(**vars(args), **vars(args1))
-  args2.model_path = os.path.expanduser(args2.model_path)
-  args2.data = os.path.expanduser(args2.data)
-  main(args2, myargs)
+
+  for k, v in vars(args1).items():
+    assert not hasattr(args, k)
+    setattr(args, k, v)
+
+  args.model_path = os.path.expanduser(args.model_path)
+  args.data = os.path.expanduser(args.data)
+  main(args, myargs)
 
 
 if __name__ == '__main__':
