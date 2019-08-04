@@ -11,3 +11,11 @@ cnn_imagenet_pretrained:
 cnn_cifar10_train_search:
   data: ~/.keras/cifar10
   unrolled: true
+
+cnn_cifar10_train_search_plot:
+  title: 'acc_epoch'
+  logfiles:
+    - '/cluster/home/it_stu39/ZhouPeng/code/darts/EXPERIMENTS/results/test_cnn_cifar10_train_search_20190802-15_20_48/log.txt'
+  re_strs:
+    - 'train_acc (\d*\.\d*)'
+    - 'valid_acc (\d*\.\d*)'
