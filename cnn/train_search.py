@@ -112,7 +112,7 @@ def main(args, myargs):
     logging.info('epoch %d lr %e', epoch, lr)
 
     genotype = model.genotype()
-    logging.info('genotype = %s', genotype)
+    myargs.textlogger.logstr(epoch, genotype=genotype)
 
     print(F.softmax(model.alphas_normal, dim=-1))
     print(F.softmax(model.alphas_reduce, dim=-1))
@@ -120,10 +120,12 @@ def main(args, myargs):
     # training
     train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr)
     logging.info('train_acc %f', train_acc)
+    myargs.textlogger.log(epoch, train_acc=train_acc)
 
     # validation
     valid_acc, valid_obj = infer(valid_queue, model, criterion)
     logging.info('valid_acc %f', valid_acc)
+    myargs.textlogger.log(epoch, valid_acc=valid_acc)
 
     utils.save(model, os.path.join(args.save, 'weights.pt'))
 
@@ -186,7 +188,7 @@ def infer(valid_queue, model, criterion):
     top5.update(prec5.data[0], n)
 
     if step % args.report_freq == 0:
-      logging.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
+      print('valid %03d %e %f %f'%(step, objs.avg, top1.avg, top5.avg))
 
   return top1.avg, objs.avg
 

@@ -40,20 +40,21 @@ parser.add_argument('--arch', type=str, default='DARTS', help='which architectur
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 args = parser.parse_args()
 
-args.save = 'eval-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
-utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
+# args.save = 'eval-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
+# utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
 log_format = '%(asctime)s %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
     format=log_format, datefmt='%m/%d %I:%M:%S %p')
-fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
-fh.setFormatter(logging.Formatter(log_format))
-logging.getLogger().addHandler(fh)
+# fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
+# fh.setFormatter(logging.Formatter(log_format))
+# logging.getLogger().addHandler(fh)
 
 CIFAR_CLASSES = 10
 
 
-def main():
+def main(args, myargs):
+  logging = myargs.logger
   if not torch.cuda.is_available():
     logging.info('no gpu device available')
     sys.exit(1)
@@ -101,9 +102,11 @@ def main():
 
     train_acc, train_obj = train(train_queue, model, criterion, optimizer)
     logging.info('train_acc %f', train_acc)
+    myargs.textlogger.log(epoch, train_acc=train_acc)
 
     valid_acc, valid_obj = infer(valid_queue, model, criterion)
     logging.info('valid_acc %f', valid_acc)
+    myargs.textlogger.log(epoch, valid_acc=valid_acc)
 
     utils.save(model, os.path.join(args.save, 'weights.pt'))
 
@@ -135,7 +138,7 @@ def train(train_queue, model, criterion, optimizer):
     top5.update(prec5.data[0], n)
 
     if step % args.report_freq == 0:
-      logging.info('train %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
+      print('train %03d %e %f %f'%(step, objs.avg, top1.avg, top5.avg))
 
   return top1.avg, objs.avg
 
@@ -160,9 +163,25 @@ def infer(valid_queue, model, criterion):
     top5.update(prec5.data[0], n)
 
     if step % args.report_freq == 0:
-      logging.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
+      print('valid %03d %e %f %f'%(step, objs.avg, top1.avg, top5.avg))
 
   return top1.avg, objs.avg
+
+
+def run(args1, myargs):
+  config = getattr(myargs.config, args1.command)
+  myargs.config = config
+  for k, v in config.items():
+    setattr(args, k, v)
+
+  for k, v in vars(args1).items():
+    assert not hasattr(args, k)
+    setattr(args, k, v)
+
+  args.data = os.path.expanduser(args.data)
+  args.save = args.outdir
+  utils.create_exp_dir(args.save, scripts_to_save=glob.glob('../cnn/*.py'))
+  main(args, myargs)
 
 
 if __name__ == '__main__':

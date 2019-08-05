@@ -12,6 +12,11 @@ cnn_cifar10_train_search:
   data: ~/.keras/cifar10
   unrolled: true
 
+cnn_cifar10_architecture_evaluation:
+  data: ~/.keras/cifar10
+  auxiliary: true
+  cutout: true
+
 cnn_cifar10_train_search_plot:
   title: 'acc_epoch'
   logfiles:

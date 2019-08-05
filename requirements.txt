@@ -6,3 +6,4 @@ tensorboardX==1.7
 tensorflow==1.13.1
 tqdm
 matplotlib
+graphviz
